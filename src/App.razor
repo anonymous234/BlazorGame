@@ -1,0 +1,123 @@
+﻿@page "/"
+@inject IJSRuntime Js
+@namespace BlazorGame
+<PageTitle>Home</PageTitle>
+@*
+Protip: if you have to insert a text element inside a cC# code block, you have to escape it with @:, like this:
+@if (...) {
+    @:<text ...>Game over</text>
+}
+*@
+    <svg @ref="svgRef" width="1200" height="600"
+         class="game-field"
+         viewBox="0 0 1200 600"
+         preserveAspectRatio="xMidYMid meet"
+         style="border:1px solid #222; background:#071019; touch-action:none;">
+        <rect x="0" y="0" width="100%" height="100%" fill="#071019"></rect>
+        <circle cx="@Inv(playerX)" cy="@Inv(playerY)" r="20" fill="tomato"/>
+        <text x="10" y="20" fill="#ccc">Use arrow keys to move or pointer to position</text>
+    </svg>
+<p>
+    @debugText
+</p>
+@code {
+    ElementReference svgRef;
+    DotNetObjectReference<App>? dotNetRef;
+    IJSObjectReference? module;
+    
+    static string Inv(double value) => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    
+    string debugText = "";
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+    }
+
+    double playerX = 400;
+    double playerY = 300;
+    readonly double speed = 220; // px/s
+    bool left, right, up, down;
+    [JSInvokable]
+    public static void SMethod()
+    {
+        Console.WriteLine("Hello from C#!");
+        
+    }
+    [JSInvokable]
+    public void Method()
+    {
+        Console.WriteLine("Hello from C#!");
+        
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await Js.InvokeAsync<IJSObjectReference>("import", "./lib/game.mjs");
+            dotNetRef = DotNetObjectReference.Create(this);
+            
+            // Call the exported function from the module
+            await module.InvokeVoidAsync("GameInit", svgRef, dotNetRef);
+
+            var x = DotNetObjectReference.Create(Method); //disposable
+            var xx = DotNetObjectReference.Create(SMethod); //disposable
+            await module.InvokeVoidAsync("Whatever", x);
+            await module.InvokeVoidAsync("Whatever", xx); //can javascript invoke xx?
+            Console.WriteLine("OK");
+        }
+    }
+
+    [JSInvokable]
+    public Task OnInput(string type, double x, double y, string key, int button)
+    {
+        switch (type)
+        {
+            case "pointermove":
+            case "pointerdown":
+                playerX = x;
+                playerY = y;
+                break;
+            case "keydown":
+                if (key == "ArrowLeft") left = true;
+                if (key == "ArrowRight") right = true;
+                if (key == "ArrowUp") up = true;
+                if (key == "ArrowDown") down = true;
+                break;
+            case "keyup":
+                if (key == "ArrowLeft") left = false;
+                if (key == "ArrowRight") right = false;
+                if (key == "ArrowUp") up = false;
+                if (key == "ArrowDown") down = false;
+                break;
+        }
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public async Task OnFrame(double timestamp, double delta)
+    {
+        var dt = delta / 1000.0;
+        var dx = 0.0;
+        var dy = 0.0;
+        if (left) dx -= 1;
+        if (right) dx += 1;
+        if (up) dy -= 1;
+        if (down) dy += 1;
+        if (dx != 0 || dy != 0)
+        {
+            var len = Math.Sqrt(dx * dx + dy * dy);
+            playerX += (dx / len) * speed * dt;
+            playerY += (dy / len) * speed * dt;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (dotNetRef != null)
+        {
+            await Js.InvokeVoidAsync("GameDispose", dotNetRef);
+            dotNetRef.Dispose();
+        }
+    }
+}
