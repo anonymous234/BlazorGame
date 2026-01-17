@@ -28,10 +28,6 @@ Protip: if you have to insert a text element inside a cC# code block, you have t
     static string Inv(double value) => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
     
     string debugText = "";
-    protected override void OnAfterRender(bool firstRender)
-    {
-        base.OnAfterRender(firstRender);
-    }
 
     double playerX = 400;
     double playerY = 300;
@@ -53,7 +49,7 @@ Protip: if you have to insert a text element inside a cC# code block, you have t
     {
         if (firstRender)
         {
-            module = await Js.InvokeAsync<IJSObjectReference>("import", "./lib/game.mjs");
+            module = await Js.InvokeAsync<IJSObjectReference>("import", "./game.mjs");
             dotNetRef = DotNetObjectReference.Create(this);
             
             // Call the exported function from the module

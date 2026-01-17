@@ -1,6 +1,4 @@
 ## To do
-- Squash and push to GitHub
-- Am I importing game.mjs correctly?
 - Center the game
 - Why InvokeAsync(StateHasChanged)?
 - Call module.DisposeAsync() ??
