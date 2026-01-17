@@ -1,5 +1,26 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a1628;
+}
+
+#app {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+.game-field {
+    border: 2px solid #1e3a5f !important;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    max-width: 95vw;
+    max-height: 80vh;
 }
 
 h1:focus {
@@ -9,7 +30,9 @@ h1:focus {
 a, .btn-link {
     color: #0071c1;
 }
-
+p{
+    color: #c8c8c8;
+}
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
@@ -68,12 +91,11 @@ a, .btn-link {
     }
 
 .loading-progress {
-    position: absolute;
+    position: relative;
     display: block;
     width: 8rem;
     height: 8rem;
-    inset: 20vh 0 auto 0;
-    margin: 0 auto 0 auto;
+    margin: 2rem 0;
 }
 
     .loading-progress circle {
@@ -91,10 +113,10 @@ a, .btn-link {
         }
 
 .loading-progress-text {
-    position: absolute;
     text-align: center;
     font-weight: bold;
-    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+    color: #ccc;
+    margin-top: 0.5rem;
 }
 
     .loading-progress-text:after {

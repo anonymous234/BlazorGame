@@ -53,13 +53,7 @@ Protip: if you have to insert a text element inside a cC# code block, you have t
             dotNetRef = DotNetObjectReference.Create(this);
             
             // Call the exported function from the module
-            await module.InvokeVoidAsync("GameInit", svgRef, dotNetRef);
-
-            var x = DotNetObjectReference.Create(Method); //disposable
-            var xx = DotNetObjectReference.Create(SMethod); //disposable
-            await module.InvokeVoidAsync("Whatever", x);
-            await module.InvokeVoidAsync("Whatever", xx); //can javascript invoke xx?
-            Console.WriteLine("OK");
+            await module.InvokeVoidAsync("GameInit", dotNetRef);
         }
     }
 
@@ -105,6 +99,7 @@ Protip: if you have to insert a text element inside a cC# code block, you have t
             playerX += (dx / len) * speed * dt;
             playerY += (dy / len) * speed * dt;
         }
+        debugText = $"({playerX:F2}, {playerY:F2})";
         await InvokeAsync(StateHasChanged);
     }
 
