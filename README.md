@@ -1,10 +1,11 @@
 ## To do
-- Why InvokeAsync(StateHasChanged)?
+- Well, I can't debug...
 - Call module.DisposeAsync() ??
-  https://learn.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/call-javascript-from-dotnet?view=aspnetcore-10.0#javascript-isolation-in-javascript-modules
+  https://learn.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/call-javascript-from-dotnet?view=aspnetcore-10.0#javascript-isolation-in-javascript-modules 
 - https://learn.microsoft.com/en-us/aspnet/core/blazor/performance/javascript-interoperability?view=aspnetcore-10.0#consider-the-use-of-synchronous-calls
 
-
+- https://rogueplanetoid.com/articles/blazor-games/
+- https://blazorgames.net
 - https://mstack.nl/blogs/20210630-blazor-game-development-1-2/
 - https://github.com/SteveDunn/PacManBlazor
 - https://github.com/carlfranklin/BlazorCanvas
@@ -24,9 +25,6 @@
 ### JS bits
 Design: minimize JS code but not if it requires unreasonable effort.
 
-Learn and migrate to https://learn.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/import-export-interop?view=aspnetcore-10.0#call-net-from-javascript
-
-This will lock us into WASM mode, but it's probably better.
 
 - Remove as much JS as possible.
 - Leave page-wide keyboard, requestAnimationFrame events in Javascript. Or can I do those with JSImport?
@@ -46,12 +44,20 @@ Checklist:
 - Scrolling world (e.g. Super Mario Bros): how?
 
 ## Sample games
+- 2048
+- RPG game (to test menus)
 - Tetris
 - Mario (single-screen)
 - Angry Birds (Box2D.NET)
+- https://blazorgames.net/
 
 ## Future
+- Maybe rename it BlazorSVGGame
 - Make sure publishing (GitHub pages) is easy
   - https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/setting-up-your-repository/setting-up-a-template-repository-for-github-codespaces
   - https://resources.github.com/learn/pathways/automation/advanced/building-your-first-custom-github-action/
 
+## FAQ
+Q: Why not just use <canvas>?
+A: Because there's no point to canvas. SVG lets the browser handle and render the elements. With canvas, you might as well write a local application.  
+The point was to reuse as much existing technology as possible.
