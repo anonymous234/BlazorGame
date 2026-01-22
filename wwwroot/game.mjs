@@ -1,24 +1,15 @@
 let svg = document.getElementById('svg');
-let dotNetRef = null;
-let rafId = null;
-let lastTimestamp = 0;
-export function GameInit (dotNetObject) {
-    dotNetRef = dotNetObject;
-    if (!svg) return;
-    svg.style.touchAction = 'none';
+let callback = null;
+
+export function GameInit (svgRef, _callback) {
+    callback = _callback;
+    svg=document.getElementById("game-field");
     svg.addEventListener('pointermove', pointerMove);
     svg.addEventListener('pointerdown', pointerDown);
     window.addEventListener('keydown', keyDown);
     window.addEventListener('keyup', keyUp);
-    lastTimestamp = 0;
-    if (rafId) window.cancelAnimationFrame(rafId);
-    rafId = window.requestAnimationFrame(frame);
 }
 export function GameDispose(dotNetObject) {
-    if (rafId) {
-        window.cancelAnimationFrame(rafId);
-        rafId = null;
-    }
     if (svg) {
         svg.removeEventListener('pointermove', pointerMove);
         svg.removeEventListener('pointerdown', pointerDown);
@@ -26,7 +17,7 @@ export function GameDispose(dotNetObject) {
     }
     window.removeEventListener('keydown', keyDown);
     window.removeEventListener('keyup', keyUp);
-    dotNetRef = null;
+    callback = null;
     try {
         dotNetObject.dispose();
     } catch (e) { }
@@ -45,29 +36,16 @@ function toSvgCoords(evt) {
     }
 }
 function pointerMove(e) {
-    if (!dotNetRef) return;
     const p = toSvgCoords(e);
-    dotNetRef.invokeMethodAsync('OnInput', 'pointermove', p.x, p.y, '', 0).catch(() => { });
+    callback(JSON.stringify({"type": 'pointermove', "x": p.x, "y":p.y}));
 }
 function pointerDown(e) {
-    if (!dotNetRef) return;
     const p = toSvgCoords(e);
-    dotNetRef.invokeMethodAsync('OnInput', 'pointerdown', p.x, p.y, '', e.button).catch(() => { });
+    callback(JSON.stringify({"type": 'pointerdown',"x": p.x, "y":p.y}));
 }
 function keyDown(e) {
-    if (!dotNetRef) return;
-    dotNetRef.invokeMethodAsync('OnInput', 'keydown', 0, 0, e.key, 0).catch(() => { });
+    callback(JSON.stringify({"type":'keydown', "key": e.key}));
 }
 function keyUp(e) {
-    if (!dotNetRef) return;
-    dotNetRef.invokeMethodAsync('OnInput', 'keyup', 0, 0, e.key, 0).catch(() => { });
-}
-
-function frame(now) {
-    if (!dotNetRef) return;
-    if (!lastTimestamp) lastTimestamp = now;
-    const delta = now - lastTimestamp;
-    lastTimestamp = now;
-    dotNetRef.invokeMethodAsync('OnFrame', now, delta).catch(() => { });
-    rafId = window.requestAnimationFrame(frame);
+    callback(JSON.stringify({"type": 'keyup', "key": e.key}));
 }

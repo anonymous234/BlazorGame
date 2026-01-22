@@ -1,8 +1,14 @@
+## About
+This Blazor project can be used as a template to create SVG-based games.
+The idea is to reuse as much existing technology as possible and take advantage of Blazor's component model, and minimize 
+the amount of JS code.
+This should allow each component to handle its own events, rendering and logic. You could even embed HTML in the SVG.
+
 ## To do
-- Well, I can't debug...
-- Call module.DisposeAsync() ??
-  https://learn.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/call-javascript-from-dotnet?view=aspnetcore-10.0#javascript-isolation-in-javascript-modules 
-- https://learn.microsoft.com/en-us/aspnet/core/blazor/performance/javascript-interoperability?view=aspnetcore-10.0#consider-the-use-of-synchronous-calls
+- JSImport:
+  - Why can't I use ElementReference, DotNetObjectReference with JsImport?
+  - Why can't I call instance methods? Or callbacks with more than 3 parameters?
+  - https://stackoverflow.com/questions/77707229/pass-net-objects-to-js-wasm
 
 - https://rogueplanetoid.com/articles/blazor-games/
 - https://blazorgames.net
@@ -13,39 +19,14 @@
 - https://github.com/aventius-software/BlazorGE/blob/master/BlazorGE.Core/wwwroot/playFieldInterop.js
 - https://github.com/aventius-software/BlazorGE/blob/master/BlazorGE.Core/Components/PlayField.razor.cs
 
-- Can I put game logic in a separate project? Should I?
-  Like
-  <svg>
-  <someOtherAssembly.TheActualGame />
-  </svg>
-  Or it could be an interface?
-
 - Handle aspect ratio changes (preserveAspectRatio="xMidYMid meet")
-- Clean game.mjs: can I remove toSvgCoords?
-### JS bits
-Design: minimize JS code but not if it requires unreasonable effort.
-
-
-- Remove as much JS as possible.
-- Leave page-wide keyboard, requestAnimationFrame events in Javascript. Or can I do those with JSImport?
-- Others (e.g. Sound?)
-
-
-## About
-
-It's a Blazor template
-
-The game will be SVG-based, not canvas, with as little JavaScript as possible.
-
-Checklist:
-- window.requestAnimationFrame()
-- Add sound
-- Try making a menu
-- Scrolling world (e.g. Super Mario Bros): how?
+- Clean game.mjs: remove toSvgCoords, use Blazor event handlers
+- Menu? Scrolling worlds (e.g. Super Mario Bros)?
 
 ## Sample games
 - 2048
 - RPG game (to test menus)
+  - Deltarune clone
 - Tetris
 - Mario (single-screen)
 - Angry Birds (Box2D.NET)
@@ -56,8 +37,3 @@ Checklist:
 - Make sure publishing (GitHub pages) is easy
   - https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/setting-up-your-repository/setting-up-a-template-repository-for-github-codespaces
   - https://resources.github.com/learn/pathways/automation/advanced/building-your-first-custom-github-action/
-
-## FAQ
-Q: Why not just use <canvas>?
-A: Because there's no point to canvas. SVG lets the browser handle and render the elements. With canvas, you might as well write a local application.  
-The point was to reuse as much existing technology as possible.

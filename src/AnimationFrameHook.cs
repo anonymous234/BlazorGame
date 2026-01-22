@@ -11,6 +11,9 @@ public static class AnimationFrameHook
 
     public class BrowserAnimationFrameEventArgs : EventArgs
     {
+        /// <summary>
+        /// Timestamp in milliseconds since the page was loaded
+        /// </summary>
         public double Timestamp { get; internal init; }
     }
     public static event EventHandler<BrowserAnimationFrameEventArgs> BrowserAnimationFrame

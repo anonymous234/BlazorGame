@@ -1,114 +1,105 @@
 ﻿@page "/"
-@inject IJSRuntime Js
+@using System.Text.Json
 @namespace BlazorGame
 <PageTitle>Home</PageTitle>
 @*
-Protip: if you have to insert a text element inside a cC# code block, you have to escape it with @:, like this:
+Protip: if you have to insert a text element inside a C# code block, you have to escape it with @:, like this:
 @if (...) {
     @:<text ...>Game over</text>
 }
 *@
-    <svg @ref="svgRef" width="1200" height="600"
-         class="game-field"
-         viewBox="0 0 1200 600"
-         preserveAspectRatio="xMidYMid meet"
-         style="border:1px solid #222; background:#071019; touch-action:none;">
-        <rect x="0" y="0" width="100%" height="100%" fill="#071019"></rect>
-        <circle cx="@Inv(playerX)" cy="@Inv(playerY)" r="20" fill="tomato"/>
-        <text x="10" y="20" fill="#ccc">Use arrow keys to move or pointer to position</text>
-    </svg>
+<svg width="1200" height="600"
+     id="game-field"
+     class="game-field"
+     viewBox="0 0 1200 600"
+     preserveAspectRatio="xMidYMid meet"
+     style="border:1px solid #222; background:#071019; touch-action:none;">
+    <rect x="0" y="0" width="100%" height="100%" fill="#071019"></rect>
+    <circle cx="@Inv(PlayerX)" cy="@Inv(PlayerY)" r="20" fill="tomato"/>
+    <text x="10" y="20" fill="#ccc">Use arrow keys to move or pointer to position</text>
+</svg>
 <p>
-    @debugText
+    @StatusText
 </p>
-@code {
-    ElementReference svgRef;
-    DotNetObjectReference<App>? dotNetRef;
-    IJSObjectReference? module;
-    
-    static string Inv(double value) => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-    
-    string debugText = "";
 
-    double playerX = 400;
-    double playerY = 300;
-    readonly double speed = 220; // px/s
-    bool left, right, up, down;
-    [JSInvokable]
-    public static void SMethod()
+@code {
+    readonly HashSet<string> currentKeys = [];
+    double cursorX = 400;
+    double cursorY = 300;
+    bool mouseMoved = false;
+
+    static string Inv(double value) => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    string StatusText = "";
+    double PlayerX = 400;
+    double PlayerY = 300;
+    const double Speed = 220; // px/s
+
+    public static void Method(object returnVal)
     {
-        Console.WriteLine("Hello from C#!");
-        
-    }
-    [JSInvokable]
-    public void Method()
-    {
-        Console.WriteLine("Hello from C#!");
-        
+        Console.WriteLine("Hello from C#!" + returnVal.GetType() + ": " + returnVal.ToString());
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            module = await Js.InvokeAsync<IJSObjectReference>("import", "./game.mjs");
-            dotNetRef = DotNetObjectReference.Create(this);
-            
-            // Call the exported function from the module
-            await module.InvokeVoidAsync("GameInit", dotNetRef);
+            BrowserInterop.GameInit("", OnInput);
+            AnimationFrameHook.BrowserAnimationFrame += OnFrame;
         }
     }
 
-    [JSInvokable]
-    public Task OnInput(string type, double x, double y, string key, int button)
+    public void OnInput(string values)
     {
+        var doc = JsonDocument.Parse(values).RootElement;
+        string type = doc.GetProperty("type").GetString()!;
+        string? key = doc.TryGetProperty("key", out var val) ? val.GetString() : null;
         switch (type)
         {
             case "pointermove":
             case "pointerdown":
-                playerX = x;
-                playerY = y;
+                mouseMoved = true;
+                cursorX = doc.GetProperty("x").GetDouble();
+                cursorY = doc.GetProperty("y").GetDouble();
                 break;
             case "keydown":
-                if (key == "ArrowLeft") left = true;
-                if (key == "ArrowRight") right = true;
-                if (key == "ArrowUp") up = true;
-                if (key == "ArrowDown") down = true;
+                currentKeys.Add(key!);
                 break;
             case "keyup":
-                if (key == "ArrowLeft") left = false;
-                if (key == "ArrowRight") right = false;
-                if (key == "ArrowUp") up = false;
-                if (key == "ArrowDown") down = false;
+                currentKeys.Remove(key!);
                 break;
         }
-        return Task.CompletedTask;
     }
 
-    [JSInvokable]
-    public async Task OnFrame(double timestamp, double delta)
+    double? lastTimestamp;
+
+    public void OnFrame(object? _, AnimationFrameHook.BrowserAnimationFrameEventArgs args)
     {
-        var dt = delta / 1000.0;
+        double dt;
+        if (lastTimestamp == null) dt = 0;
+        else dt = (args.Timestamp - lastTimestamp.Value) / 1000.0; //seconds
+        lastTimestamp = args.Timestamp;
+
+        if (mouseMoved)
+        {
+            PlayerX = cursorX;
+            PlayerY = cursorY;
+            mouseMoved = false;
+        }
+
         var dx = 0.0;
         var dy = 0.0;
-        if (left) dx -= 1;
-        if (right) dx += 1;
-        if (up) dy -= 1;
-        if (down) dy += 1;
+        if (currentKeys.Contains("ArrowLeft")) dx -= 1;
+        if (currentKeys.Contains("ArrowRight")) dx += 1;
+        if (currentKeys.Contains("ArrowUp")) dy -= 1;
+        if (currentKeys.Contains("ArrowDown")) dy += 1;
         if (dx != 0 || dy != 0)
         {
             var len = Math.Sqrt(dx * dx + dy * dy);
-            playerX += (dx / len) * speed * dt;
-            playerY += (dy / len) * speed * dt;
+            PlayerX += (dx / len) * Speed * dt;
+            PlayerY += (dy / len) * Speed * dt;
         }
-        debugText = $"({playerX:F2}, {playerY:F2})";
-        await InvokeAsync(StateHasChanged);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (dotNetRef != null)
-        {
-            await Js.InvokeVoidAsync("GameDispose", dotNetRef);
-            dotNetRef.Dispose();
-        }
+        StatusText = $"({PlayerX:F2}, {PlayerY:F2}) - ";
+        foreach(string key in currentKeys) StatusText += $"{key}, ";
+        InvokeAsync(StateHasChanged);
     }
 }
