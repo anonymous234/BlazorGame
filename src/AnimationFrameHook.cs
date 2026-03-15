@@ -1,6 +1,9 @@
-﻿using System.Runtime.Versioning;
+using System.Runtime.Versioning;
 
 namespace BlazorGame;
+/// <summary>
+/// This class provides a public event that gets called on the browser's RequestAnimationFrame
+/// </summary>
 [SupportedOSPlatform("browser")]
 public static class AnimationFrameHook
 {
@@ -16,6 +19,9 @@ public static class AnimationFrameHook
         /// </summary>
         public double Timestamp { get; internal init; }
     }
+    /// <summary>
+    /// Subscribing to this event will start a loop that calls listeners as defined in HTML's RequestAnimationFrame 
+    /// </summary>
     public static event EventHandler<BrowserAnimationFrameEventArgs> BrowserAnimationFrame
     {
         add
