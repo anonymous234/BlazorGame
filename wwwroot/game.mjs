@@ -1,26 +1,29 @@
 let svg = document.getElementById('svg');
 let callback = null;
 
-export function GameInit (svgRef, _callback) {
-    callback = _callback;
-    svg=document.getElementById("game-field");
+export async function Init (svgId, assemblyName) {
+    //This is way too fragile, but that's not my fault
+    const { getAssemblyExports } = await globalThis.getDotnetRuntime(0);
+    const exports = await getAssemblyExports(assemblyName); //eg. "BlazorGame.dll"
+    callback = exports.BlazorGame.BrowserInterop.OnDomEventJs;
+    if(!callback) throw 'Method OnDomEventJs not found in assembly '+assemblyName;
+
+    svg=document.getElementById(svgId);
+    if(!svg) throw 'Invalid SVG: ' + svgId;
     svg.addEventListener('pointermove', pointerMove);
     svg.addEventListener('pointerdown', pointerDown);
     window.addEventListener('keydown', keyDown);
     window.addEventListener('keyup', keyUp);
 }
-export function GameDispose(dotNetObject) {
-    if (svg) {
-        svg.removeEventListener('pointermove', pointerMove);
-        svg.removeEventListener('pointerdown', pointerDown);
-        svg = null;
-    }
+export function Dispose() {
+    //Might be called multiple times
+    if (!svg && !callback) return;
+    svg.removeEventListener('pointermove', pointerMove);
+    svg.removeEventListener('pointerdown', pointerDown);
     window.removeEventListener('keydown', keyDown);
     window.removeEventListener('keyup', keyUp);
+    svg = null;
     callback = null;
-    try {
-        dotNetObject.dispose();
-    } catch (e) { }
 }
 
 function toSvgCoords(evt) {
@@ -37,15 +40,15 @@ function toSvgCoords(evt) {
 }
 function pointerMove(e) {
     const p = toSvgCoords(e);
-    callback(JSON.stringify({"type": 'pointermove', "x": p.x, "y":p.y}));
+    callback("pointermove", null, p.x, p.y);
 }
 function pointerDown(e) {
     const p = toSvgCoords(e);
-    callback(JSON.stringify({"type": 'pointerdown',"x": p.x, "y":p.y}));
+    callback("pointerdown", null, p.x, p.y);
 }
 function keyDown(e) {
-    callback(JSON.stringify({"type":'keydown', "key": e.key}));
+    callback("keydown", e.key, 0, 0);
 }
 function keyUp(e) {
-    callback(JSON.stringify({"type": 'keyup', "key": e.key}));
+    callback("keyup", e.key, 0, 0);
 }

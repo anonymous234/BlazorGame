@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.Text.Json
+@implements IDisposable
 @namespace BlazorGame
 <PageTitle>Home</PageTitle>
 <svg id="game-field"
@@ -36,29 +37,28 @@
     {
         if (firstRender)
         {
-            BrowserInterop.GameInit("", OnInput);
+            await BrowserInterop.GameInit("game-field", typeof(BrowserInterop).Assembly.GetName().Name+".dll");
+            BrowserInterop.SvgDomEventReceived += OnInput;
             AnimationFrameHook.BrowserAnimationFrame += OnFrame;
         }
     }
+    
 
-    public void OnInput(string values)
+    private void OnInput(object? e, BrowserInterop.DomEventArgs domEventArgs)
     {
-        var doc = JsonDocument.Parse(values).RootElement;
-        string type = doc.GetProperty("type").GetString()!;
-        string? key = doc.TryGetProperty("key", out var val) ? val.GetString() : null;
-        switch (type)
+        switch (domEventArgs.EventName)
         {
             case "pointermove":
             case "pointerdown":
                 mouseMoved = true;
-                cursorX = doc.GetProperty("x").GetDouble();
-                cursorY = doc.GetProperty("y").GetDouble();
+                cursorX = domEventArgs.X;
+                cursorY = domEventArgs.Y;
                 break;
             case "keydown":
-                currentKeys.Add(key!);
+                currentKeys.Add(domEventArgs.KeyName);
                 break;
             case "keyup":
-                currentKeys.Remove(key!);
+                currentKeys.Remove(domEventArgs.KeyName);
                 break;
         }
     }
@@ -94,5 +94,10 @@
         StatusText = $"({PlayerX:F2}, {PlayerY:F2}) - ";
         foreach(string key in currentKeys) StatusText += $"{key}, ";
         InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        BrowserInterop.Dispose();
     }
 }

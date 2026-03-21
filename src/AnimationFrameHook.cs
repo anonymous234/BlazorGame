@@ -1,5 +1,6 @@
 using System.Runtime.Versioning;
-
+//This could have been in BrowserInterop and simpler, but I wanted to try and make this reusable
+//Important: not currently thread-safe since Blazor WASM is single-threaded. Add locks if it's necessary in the future.
 namespace BlazorGame;
 /// <summary>
 /// This class provides a public event that gets called on the browser's RequestAnimationFrame
@@ -7,7 +8,6 @@ namespace BlazorGame;
 [SupportedOSPlatform("browser")]
 public static class AnimationFrameHook
 {
-    //Important: not currently thread-safe since Blazor WASM is single-threaded. Add locks if it's necessary in the future.
     //static readonly Lock Locker = new();
     static EventHandler<BrowserAnimationFrameEventArgs>? TheEvent;
     static long? ActiveRequestId;

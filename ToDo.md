@@ -1,16 +1,4 @@
-﻿## To do
-
-- JSImport:
-    - Why can't I use ElementReference, DotNetObjectReference with JsImport?
-    - Why can't I call instance methods? Or callbacks with more than 3 parameters?
-    - https://stackoverflow.com/questions/77707229/pass-net-objects-to-js-wasm
-
-
-- Clean game.mjs: remove toSvgCoords, use Blazor event handlers
-
-- https://rogueplanetoid.com/articles/blazor-games/
-- https://blazorgames.net
-- https://mstack.nl/blogs/20210630-blazor-game-development-1-2/
+﻿- https://mstack.nl/blogs/20210630-blazor-game-development-1-2/
 - https://github.com/SteveDunn/PacManBlazor
 - https://github.com/carlfranklin/BlazorCanvas
 - https://www.davidguida.net/blazor-gamedev-part-2-canvas-initialization/
@@ -18,9 +6,7 @@
 - https://github.com/aventius-software/BlazorGE/blob/master/BlazorGE.Core/Components/PlayField.razor.cs
 
 
-- Menu? Scrolling worlds (e.g., Super Mario Bros)?
-
-## Sample games
+- Skifree
 - 2048
 - Flappy Bird
 - Pacman
@@ -35,7 +21,6 @@
 - Mario (single-screen)
 - Elasto Mania / X-Moto
 - Angry Birds (Box2D.NET)
-- Skifree
 - Monopoly
 - https://blazorgames.net/
 
