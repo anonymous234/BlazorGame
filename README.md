@@ -15,5 +15,5 @@ Well, if you want to build a prototype in C#, it's pretty handy.
 ## Usage
 - The viewBox is defined as 1200x600, which should be treated as the main game area. However, more area might be visible
 than that in some screen sizes.
-- Due to Razor syntax, to add a <text> element it's necessary to use "@:<text>".
+- Due to Razor syntax, to add a &lt;text> element it's necessary to use "@:&lt;text>".
  
